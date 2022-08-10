@@ -1,0 +1,20 @@
+- name: Creating grafana user group
+  group: name="grafana"
+  become: true
+
+- name: Creating grafana user
+  user:
+    name: "grafana"
+    group: "grafana"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "grafana nologin User"
+    createhome: "no"
+    state: present
+
+- name: Install grafana
+  unarchive:
+    src: "https://dl.grafana.com/enterprise/release/grafana-enterprise-9.0.6.linux-amd64.tar.gz"
+    dest: /tmp/
+    remote_src: yes
+

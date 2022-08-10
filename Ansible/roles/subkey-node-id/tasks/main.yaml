@@ -1,0 +1,58 @@
+- name: Download Installer
+  get_url:
+    url: https://sh.rustup.rs
+    dest: /tmp/sh.rustup.rs
+    mode: '0755'
+    force: 'yes'
+  tags:
+    - rust
+
+- name: install rust/cargo
+  shell: /tmp/sh.rustup.rs -y
+  tags:
+    - rust
+
+- name: Ansible apt-get to get install build essential
+  apt:
+    state: present
+    update_cache: yes
+    name: 
+      - build-essential
+      - clang
+      - pkg-config
+      - libssl-dev
+      - make
+
+- name: Clone substrate github repository
+  git:
+    repo: https://github.com/paritytech/substrate.git
+    dest: /tmp/substrate
+    clone: yes
+
+- name: Export rust/cargo & build subkey
+  shell: |
+      source $HOME/.cargo/env
+      rustup install nightly
+      cargo  build --package subkey --release
+  args:
+    executable: /bin/bash
+    chdir: "/tmp/substrate" 
+
+- name: Verify subkey is installed
+  shell:
+      "./target/release/subkey --help"
+
+- name: Create subkey node file directory (/substrate/node-key)
+  file:
+    path: '/substrate/node-key'
+    state: directory 
+
+- name: Generate subkey node key secret
+  shell:
+      "subkey generate-node-key --file /substrate/node-key/id"
+
+- name: Display the node id
+  shell: cat /substrate/node-key/id
+  register: displayid
+  
+- debug: msg="{{displayid.stdout_lines}}"

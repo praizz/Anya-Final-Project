@@ -1,0 +1,30 @@
+[Unit]
+Description=Anya Polkadot Rpcnode
+MemoryHigh=7400M
+MemoryMax=7500M
+
+
+[Service]
+ExecStart=polkadot --name=anya-parachain-rpc --base-path=/parachain-rn --unsafe-ws-external \
+--rpc-methods=Safe --rpc-cors=* --chain=rococo \
+--listen-addr=/ip4/0.0.0.0/tcp/30334 \
+--public-addr=/ip4/{{ ansible_host }}/tcp/30334 \
+--in-peers=50 --out-peers=50 --pruning=archive \
+--prometheus-external --prometheus-port=9615 \
+--ws-port=8844 --rpc-port=8833 \
+--ws-max-connections=1000 \
+-- \
+--chain=kusama --base-path=/relaychain-rn \
+--listen-addr=/ip4/0.0.0.0/tcp/30333 \
+--public-addr=/ip4/{{ ansible_host }}/tcp/30333 \
+--in-peers=50 --out-peers=50 \
+--pruning=1000 --unsafe-pruning \
+--prometheus-external --prometheus-port=9625 \
+--ws-port=9944 --rpc-port=9933
+
+
+Restart=always
+RestartSec=120
+
+[Install]
+WantedBy=multi-user.target

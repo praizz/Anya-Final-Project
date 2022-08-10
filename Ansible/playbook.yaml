@@ -1,0 +1,51 @@
+- name: Boostrap polkadot boot node
+  hosts: tag_node_type_bootnode
+  become: yes
+  roles:
+    - subkey-node-id
+    - polkadot
+    - node-exporter
+  vars:
+    gpg_key: "9D4B2B6EB8F97156D19669A9FF0812D491B96798"
+    keyrings_parity: "/usr/share/keyrings/"
+    node_id: "/substrate/node-key/id"
+    ansible_ssh_private_key_file: ./ssh/.ssh/id_rsa
+    ansible_port: 22 
+    ansible_user: "ubuntu" 
+    node_type: "bootnode"  
+
+
+- name: Boostrap polkadot collator node
+  hosts: tag_node_type_collatornode
+  become: yes
+  roles:
+    - subkey-node-id
+    - polkadot 
+    - node-exporter
+    - prometheus
+    - grafana   
+  vars:
+    gpg_key: "9D4B2B6EB8F97156D19669A9FF0812D491B96798"
+    keyrings_parity: "/usr/share/keyrings/"
+    node_id: "/substrate/node-key/id"
+    ansible_ssh_private_key_file: ./ssh/.ssh/id_rsa
+    ansible_port: 22 
+    ansible_user: "ubuntu" 
+    node_type: "collatornode"  
+    
+
+- name: Boostrap polkadot rpc node
+  hosts: tag_node_type_rpcnode
+  become: true
+  roles:
+    - polkadot 
+    - node-exporter 
+  vars:
+    gpg_key: "9D4B2B6EB8F97156D19669A9FF0812D491B96798"
+    keyrings_parity: "/usr/share/keyrings/"
+    ansible_ssh_private_key_file: ./ssh/.ssh/id_rsa
+    ansible_port: 22 
+    ansible_user: "ubuntu" 
+    node_type: "rpcnode"  
+    
+

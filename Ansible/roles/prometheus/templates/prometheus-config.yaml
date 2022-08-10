@@ -1,0 +1,29 @@
+global:
+  evaluation_interval: 15s
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: 
+          - ['localhost:9090']
+  - job_name: nodes
+    static_configs:
+{% for host in groups['all'] %}
+      - targets: [{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9100]
+        labels: {'host': '{{ inventory_hostname }}' }
+{% endfor %}
+
+  # - job_name: rpcnode-1
+  #   static_configs:
+  #     - targets: 
+  #         - {{ ansible_host }}:9100
+  # - job_name: rpcnode-2
+  #   static_configs:
+  #     - targets:
+  #         - {{ ansible_host }}:9100
+  # - job_name: collatornode-1
+  #   static_configs:
+  #     - targets: 
+  #         - {{ ansible_host }}:9100

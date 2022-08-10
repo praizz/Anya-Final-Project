@@ -1,0 +1,69 @@
+- name: Creating prometheus user group
+  group: name="prometheus"
+  become: true
+
+- name: Creating prometheus user
+  user:
+    name: "prometheus"
+    group: "prometheus"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "prometheus nologin User"
+    createhome: "no"
+    state: present
+
+- name: Install prometheus
+  unarchive:
+    src: "https://github.com/prometheus/prometheus/releases/download/v2.37.0/prometheus-2.37.0.linux-amd64.tar.gz"
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copy prometheus file to bin
+  copy:
+    src: "/tmp/prometheus-2.37.0.linux-amd64/prometheus"
+    dest: "/usr/local/bin/prometheus"
+    owner: "prometheus"
+    group: "prometheus"
+    remote_src: yes
+    mode: 0755
+
+- name: Delete prometheus tmp folder
+  file:
+    path: '/tmp/prometheus-2.37.0.linux-amd64'
+    state: absent
+
+- name: Ensure system file exists first
+  file:
+    path: '/usr/lib/systemd/system'
+    state: directory
+
+- name: Ensure that /etc/prometheus exists
+  file:
+    state: directory
+    path: /etc/prometheus
+    owner: "prometheus"
+    group: "prometheus"
+    mode: 0755
+
+- name: Copy prometheus config file
+  template:
+    src: prometheus-config.yaml
+    dest: /etc/prometheus/prometheus.yaml
+
+- name: Copy prometheus system file
+  copy:
+    src: prometheus.service
+    dest: /usr/lib/systemd/system/prometheus.service
+
+- name: Reload daemon set
+  systemd:
+    name: prometheus.service
+    state: reloaded
+    daemon-reload: yes
+
+- name: Start prometheus service
+  systemd:
+    name: prometheus.service
+    state: started
+    enabled: yes
+
